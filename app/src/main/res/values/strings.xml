@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">ECommerceApplication</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="username">Username:</string>
+    <string name="password">Password:</string>
+    <string name="register">Register</string>
+    <string name="action_shopping_cart">Shopping cart</string>
+
+    <string name="sort_prompt">Choose sorting order</string>
+
+    <string name="cancel">Cancel</string>
+
+    <string-array name="sort_by">
+        <item>Name ascending</item>
+        <item>Name descending</item>
+        <item>Price ascending</item>
+        <item>Price descending</item>
+    </string-array>
+    <string name="title_activity_shopping_cart">ShoppingCartActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+
+</resources>

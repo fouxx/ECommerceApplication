@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="25dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/username"
+        android:id="@+id/usernameText"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/username"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password"
+        android:id="@+id/passwordText"
+        android:layout_gravity="center_horizontal" />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:id="@+id/password"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_sign_in"
+        android:id="@+id/signIn"
+        android:layout_marginTop="25dp"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp">
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/register"
+            android:id="@+id/register" />
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/cancel"
+            android:id="@+id/cancel" />
+
+    </LinearLayout>
+
+</LinearLayout>
