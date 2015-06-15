@@ -5,6 +5,9 @@ import android.content.Context;
 import java.util.List;
 
 import database.MySQLiteHelper;
+import helpers.Acceptable;
+import helpers.ShoppingCartConcreteVisitor;
+import helpers.ShoppingCartVisitor;
 
 /**
  * Created by fouxx on 2015-06-13.
@@ -53,8 +56,9 @@ public class User {
     public String getCollectiveCartPrice(Context context){
         List<CartItem> items = getCart(context);
         int collectivePrice = 0;
+        ShoppingCartVisitor visitor = new ShoppingCartConcreteVisitor();
         for(CartItem i : items){
-            collectivePrice += (i.getItem().getPrice()*i.getQuantity());
+            collectivePrice += (((Acceptable)i.getItem()).accept(visitor))*i.getQuantity();
         }
         return Item.getFormattedPrice(collectivePrice);
     }

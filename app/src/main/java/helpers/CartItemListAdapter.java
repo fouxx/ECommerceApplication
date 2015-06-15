@@ -12,6 +12,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import classes.CartItem;
+import classes.FruitItem;
 import classes.Item;
 import classes.User;
 import designpatterns.project.ecommerceapplication.R;
@@ -41,6 +42,7 @@ public class CartItemListAdapter extends ArrayAdapter<CartItem> {
         final TextView itemName = (TextView) view.findViewById(R.id.cart_item_name);
         final TextView itemQuantity = (TextView) view.findViewById(R.id.cart_item_quantity);
         final TextView itemPrice = (TextView) view.findViewById(R.id.cart_item_price);
+        final TextView collectiveItemPrice = (TextView) view.findViewById(R.id.collective_item_price);
 
         final Item item = itemList.get(position).getItem();
 
@@ -63,8 +65,14 @@ public class CartItemListAdapter extends ArrayAdapter<CartItem> {
 
         itemName.setText(item.getName());
         itemQuantity.setText("Quantity: " + itemList.get(position).getQuantity());
-        itemPrice.setText(item.getFormattedPrice());
-
+        if(item.getCategory().equals("fruit")){
+            itemPrice.setText(((FruitItem)item).getFormattedWeight() + " * " + item.getFormattedPrice() + "(/100g)");
+            ShoppingCartVisitor visitor = new ShoppingCartConcreteVisitor();
+            collectiveItemPrice.setText(Item.getFormattedPrice((((Acceptable)item).accept(visitor))*itemList.get(position).getQuantity()));
+        } else {
+            itemPrice.setText(item.getFormattedPrice());
+            collectiveItemPrice.setText(Item.getFormattedPrice(item.getPrice()*itemList.get(position).getQuantity()));
+        }
         return view;
 
     }

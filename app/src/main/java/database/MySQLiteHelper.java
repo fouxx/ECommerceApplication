@@ -7,14 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 import java.util.Random;
 
+import classes.BookItem;
 import classes.CartItem;
+import classes.FruitItem;
 import classes.Item;
 import classes.User;
-import helpers.SessionManager;
 
 /**
  * Created by fouxx on 2015-06-13.
@@ -41,8 +41,11 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
     private static final String ITEMS_COLUMN_ID = "item_id";
     private static final String ITEMS_COLUMN_NAME = "item_name";
     private static final String ITEMS_COLUMN_PRICE = "item_price";
+    private static final String ITEMS_COLUMN_CATEGORY = "item_category";
+    private static final String ITEMS_COLUMN_AUTHOR = "items_author";
+    private static final String ITEMS_COLUMN_WEIGHT = "items_price_per_grams";
 
-    private static final String[] ITEM_COLUMNS = {ITEMS_COLUMN_ID, ITEMS_COLUMN_NAME, ITEMS_COLUMN_PRICE};
+    private static final String[] ITEM_COLUMNS = {ITEMS_COLUMN_ID, ITEMS_COLUMN_NAME, ITEMS_COLUMN_PRICE, ITEMS_COLUMN_AUTHOR, ITEMS_COLUMN_WEIGHT};
 
     private static final String TABLE_CART = "cart_table";
     private static final String CART_COLUMN_ITEM_ID = "cart_item_id";
@@ -103,6 +106,9 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
                 + TABLE_ITEMS + "( " + ITEMS_COLUMN_ID
                 + " integer primary key autoincrement, " + ITEMS_COLUMN_NAME
                 + " text not null, " + ITEMS_COLUMN_PRICE
+                + " integer not null default 0, " + ITEMS_COLUMN_CATEGORY
+                + " text not null default 'item', " + ITEMS_COLUMN_AUTHOR
+                + " text not null default '', " + ITEMS_COLUMN_WEIGHT
                 + " integer not null default 0 );";
         db_.execSQL(ITEMS_CREATE);
 
@@ -167,7 +173,22 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
 
         if(cursor.moveToFirst()){
             do {
-                itemList.add(new Item(cursor.getInt(0), cursor.getString(1), cursor.getInt(2)));
+                String category = cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_CATEGORY));
+                if(category.equals("book")){
+                    BookItem book = new BookItem(cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_ID)),
+                                                 cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_NAME)),
+                                                 cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_PRICE)),
+                                                 cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_AUTHOR)));
+                    itemList.add(book);
+                }else if(category.equals("fruit")){
+                    FruitItem fruit = new FruitItem(cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_ID)),
+                                                   cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_NAME)),
+                                                   cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_PRICE)),
+                                                   cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_WEIGHT)));
+                    itemList.add(fruit);
+                }else{
+                    itemList.add(new Item(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), ""));
+                }
             }while (cursor.moveToNext());
         }
 
@@ -219,6 +240,29 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
         }
     }
 
+    public Item getItem(int itemID){
+        String query = "SELECT * FROM " + TABLE_ITEMS + " WHERE " + ITEMS_COLUMN_ID + " = " + itemID;
+        Cursor cursor = getMyWritableDatabase().rawQuery(query, null);
+
+        if(cursor.moveToFirst()){
+            String category = cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_CATEGORY));
+            if(category.equals("book")){
+                BookItem book = new BookItem(cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_NAME)),
+                        cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_PRICE)),
+                        cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_AUTHOR)));
+                return book;
+            }else if(category.equals("fruit")) {
+                FruitItem fruit = new FruitItem(cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndex(ITEMS_COLUMN_NAME)),
+                        cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_PRICE)),
+                        cursor.getInt(cursor.getColumnIndex(ITEMS_COLUMN_WEIGHT)));
+                return fruit;
+            }
+        }
+        return new Item(cursor.getInt(0), cursor.getString(1), cursor.getInt(2), "");
+    }
+
     public List<CartItem> getUsersCart(User user){
         List<CartItem> cartItemList = new ArrayList<CartItem>();
 
@@ -227,14 +271,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
         if(cursor.moveToFirst()){
             do {
                 int itemID = cursor.getInt(0);
-                String query2 = "SELECT * FROM " + TABLE_ITEMS + " WHERE " + ITEMS_COLUMN_ID + " = " + itemID;
-                Cursor cursor2 = getMyWritableDatabase().rawQuery(query2, null);
-
-                if(cursor2.moveToFirst()){
-                    do {
-                        cartItemList.add(new CartItem(new Item(cursor2.getInt(0), cursor2.getString(1), cursor2.getInt(2)), cursor.getInt(2)));
-                    }while (cursor2.moveToNext());
-                }
+                cartItemList.add(new CartItem(getItem(itemID), cursor.getInt(2)));
             }while (cursor.moveToNext());
         }
 
@@ -242,15 +279,29 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
     }
 
     public void generateItems(){
+        String[] authors = {"Tabitha J. Davis", "Jeremy E. Holland", "Elizabeth W. Abate", "Jimmy J. Hite", "Sara R. Hurtado", "Ashley J. Cole", "David M. Rhoden", "Ginger S. Parker", "Jeanne A. Adams", "James C. King"};
+        String[] titles = {"28 days of Spirits", "Star Game", "Big Prey", "Dark Crash", "Dragon Island", "The Haunted Planets", "Vampire Ninja", "Power Omniverse", "Invisible Gamer", "Virtual Battle", "The Lost Death", "Ghost Nature", "Mortal Monster", "Dragon Apocalypse", "Base of the Reality", "District Cell", "Fellowship of the Avenger", "The Extraordinary Predator", "Massive Intelligence", "Forgotten Knight"};
+        String[] fruits = {"Watermelon", "Apple", "Peach", "Banana", "Orange", "Mango", "Pineapple", "Melon", "Pear", "Tangerine", "Plum", "Apricot", "Nectarine", "Strawberry", "Kiwifruit", "Cherry", "Grapefruit", "Fig", "Lychee", "Coconut"};
         ContentValues values;
         for(int i = 1; i <= 20; i++){
             values = new ContentValues();
-            String name = "Item No. " + i;
-            values.put(ITEMS_COLUMN_NAME, name);
             Random rand = new Random();
-            int price = rand.nextInt((10000 - 100) + 1) + 100;
-            values.put(ITEMS_COLUMN_PRICE, price);
-            System.out.println("Name: " + name + "; Price: " + price);
+
+            int randCat = rand.nextInt(10);
+            if(randCat%2==0){
+                int price = rand.nextInt((1500 - 100) + 1) + 100;
+                values.put(ITEMS_COLUMN_PRICE, price);
+                values.put(ITEMS_COLUMN_CATEGORY, "fruit");
+                values.put(ITEMS_COLUMN_NAME, fruits[i-1]);
+                values.put(ITEMS_COLUMN_WEIGHT, rand.nextInt((5000 - 20) + 1) + 20);
+            }else{
+                int price = rand.nextInt((5000 - 100) + 1) + 100;
+                values.put(ITEMS_COLUMN_PRICE, price);
+                values.put(ITEMS_COLUMN_CATEGORY, "book");
+                values.put(ITEMS_COLUMN_NAME, titles[i-1]);
+                values.put(ITEMS_COLUMN_AUTHOR, authors[rand.nextInt(10)]);
+
+            }
             getMyWritableDatabase().insert(TABLE_ITEMS, null, values);
         }
     }

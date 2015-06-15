@@ -36,7 +36,7 @@ class PriceAscComparator implements Comparator<Item>{
     }
 }
 
-class ComparatorFactory{
+public class ComparatorFactory{
     public Comparator<Item> getComparator(String order){
         switch (order){
             case "Name ascending":

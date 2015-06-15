@@ -31,9 +31,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New Text"
-        android:layout_marginTop="15dp"
         android:id="@+id/cart_item_price"
-        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_alignTop="@+id/cart_item_name"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -47,5 +47,15 @@
         android:layout_below="@+id/cart_item_name"
         android:layout_toRightOf="@+id/delete_from_cart"
         android:layout_toEndOf="@+id/delete_from_cart" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Medium Text"
+        android:id="@+id/collective_item_price"
+        android:layout_below="@+id/cart_item_price"
+        android:layout_alignRight="@+id/cart_item_price"
+        android:layout_alignEnd="@+id/cart_item_price" />
 
 </RelativeLayout>

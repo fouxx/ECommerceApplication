@@ -2,19 +2,27 @@ package designpatterns.project.ecommerceapplication;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import classes.Item;
+import database.MySQLiteHelper;
 import helpers.ItemListAdapter;
 import helpers.SessionManager;
 
@@ -29,20 +37,51 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         sm = SessionManager.getInstance(this);
-        //MySQLiteHelper.getInstance(getApplicationContext()).generateItems();
 
-        final ItemListAdapter adapter = new ItemListAdapter(this, Item.getAllItems(getApplicationContext()));
+        generateDB();
+
+        final Spinner spinner = (Spinner) findViewById(R.id.sort_spinner);
+
+        ListView categories = (ListView) findViewById(R.id.categories);
+        String[] categoryList = {"All", "Books", "Fruits"};
+        ArrayList<String> list = new ArrayList<String>();
+        list.addAll(Arrays.asList(categoryList));
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
+        categories.setAdapter(listAdapter);
+
+        final List<Item> items = Item.getAllItems(getApplicationContext());
+        final ItemListAdapter adapter = new ItemListAdapter(this, items);
         adapter.sort(new NameDescComparator());
-        ListView listView = (ListView) findViewById(R.id.item_list);
+        final ListView listView = (ListView) findViewById(R.id.item_list);
         listView.setAdapter(adapter);
 
-        Spinner spinner = (Spinner) findViewById(R.id.sort_spinner);
+
+        categories.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                spinner.setSelection(0);
+                switch (position){
+                    case 0:
+                        adapter.displayAll();
+                        break;
+                    case 1:
+                        adapter.displayBooks();
+                        break;
+                    case 2:
+                        adapter.displayFruits();
+                        break;
+
+                }
+            }
+        });
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String sortOrder = parent.getItemAtPosition(position).toString();
                 ComparatorFactory comparator = new ComparatorFactory();
-                adapter.sort(comparator.getComparator(sortOrder));
+                adapter.sortOrder(comparator.getComparator(sortOrder));
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -133,5 +172,15 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void generateDB(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(!prefs.getBoolean("firstTime", false)) {
+            MySQLiteHelper.getInstance(getApplicationContext()).generateItems();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("firstTime", true);
+            editor.commit();
+        }
     }
 }
